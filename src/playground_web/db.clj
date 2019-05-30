@@ -1,7 +1,6 @@
 (ns playground-web.db
-  (:require [clojure.java.io :as io]
-            [clojure.pprint :refer [pprint]]
-            [datomic.api :as d]))
+  (:require [datomic.api :as d]
+            [clojure.java.io :as io]))
 
 ;; Load schemam and data from files
 (def schema (read-string (slurp (io/resource "db/schema.edn"))))
@@ -25,15 +24,43 @@
 ;;                ---> Transactor
 ;; 
 (defn connect
+  "Creates an in memory databse and connect to
+   the peer library to the database. Returns a
+   connection if successful"
   [uri]
   (if (d/create-database uri)
-    ;; connect peer to database
     (d/connect uri)))
 
 
 ;; Now we can transact the schema
 (defn transact-schema
+  "Write schema to db"
   [conn]
   (d/transact conn schema))
 
 
+(defn transact-data
+  "Write test data to dab"
+  [conn]
+  (d/transact conn data))
+
+
+(defn init-db
+  "Connects to the db transacts schema and data
+  and returns the current databse value"
+  []
+  (let [conn (connect db-uri)]
+    (transact-schema conn)
+    (transact-data conn)))
+
+
+
+(def movie-query
+  '[:find ?e ?title
+    :where
+    [?e :movie/title ?title]])
+
+
+(defn run-query
+  [query]
+  (d/q query (d/db conn)))

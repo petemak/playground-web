@@ -55,12 +55,64 @@
 
 
 
-(def movie-query
+(def all-movies
   '[:find ?e ?title
     :where
     [?e :movie/title ?title]])
 
+;; (d/q all-movies (d/db conn)
+
+
+(def movies-of-year
+  '[:find ?title
+    :where
+    [?e :movie/year 1985]
+    [?e :movie/title ?title]])
+
+;;(d/q movies-of-year (d/db conn))
+
+
+;; Parameters
+(def movies-of-actor
+  '[:find ?title
+    :in $ ?name
+    [?p :person/name ?name]
+    [?m :movie/cast ?p]
+    [?m :movie/title ?title]])
+
+;; (d/q movies-of-actor (d/db conn) "Arnold Schwazenegger")
+
+(def who-directed-actor
+  '[:find ?director-name
+    :in $ ?actor-name
+    :where
+    [?p :person/name ?actor-name]
+    [?m :movie/cast ?p]
+    [?m :movie/director ?d]
+    [?d :person/name ?director-name]])
+
+;; (d/q who-directed-actor (d/db conn) "Arnold Schwazenegger")
+
+
+;; Relations
+(def earnings
+  ["Die Hard" 14030000]
+  ["Alien" 104931801]
+  ["Commando" 54791000])
+
+(def earnings-of-director
+  [:find ?title ?earnings
+   :in $ ?director
+   [?p :person/name ?director]
+   [?m :movie/direcor ?p]
+   [?m :movie/title ?title]])
+
+
+
 
 (defn run-query
-  [query]
+  [query conn]
   (d/q query (d/db conn)))
+
+
+ 
